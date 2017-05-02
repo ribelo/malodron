@@ -1,0 +1,29 @@
+html, body {
+    height: 100%;
+}
+
+#app {
+    height: 100%;
+}
+
+.grid {
+    height: 100%;
+}
+
+.grid-cell {
+    box-sizing: border-box;
+    width: 5vh;
+    height: 5vh;
+    text-align: center;
+    border: 1px solid #EEEEEE;
+    /*background-color: #332F28;*/
+    font-family: monospace;
+}
+
+.floor-cell {
+    background-color: #E0E0E0;
+}
+
+.shelf-cell {
+    background-color: #BDBDBD;
+}

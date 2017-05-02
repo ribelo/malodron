@@ -1,0 +1,20 @@
+{
+  "name": "malodron",
+  "version": "0.0.1",
+  "author": "rafal@krzywaznia.com",
+  "main": "resources/public/js/electron.js",
+  "scripts": {
+    "watch": "webpack -d --watch",
+    "build": "webpack -p"
+  },
+  "dependencies": {
+    "react": "15.4.2",
+    "react-dom": "15.4.2",
+    "webpack": "1.13.1",
+    "semantic-ui-react": "0.68.2",
+    "react-virtualized": "9.7.3",
+    "react-lazy-load ": "3.0.12",
+    "react-swipeable-views": "0.12.0",
+    "react-tap-event-plugin": "2.0.1"
+  }
+}
