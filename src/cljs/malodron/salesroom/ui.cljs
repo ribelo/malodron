@@ -119,22 +119,63 @@
                              :opacity    (if @hover? 1.0 0.0)}}]]])))
 
 
-(defn product-component []
-  (let [product-idx (rf/subscribe [:salesroom/shelves])
-        product (reaction (get-in @shelves [segment-idx shelf-idx product-idx]))]
-    (fn [segment-idx shelf-idx product-idx]
-      [ui/grid
-       [ui/grid-row
-        [:div (str segment-idx shelf-idx product-idx)]]])))
+;(defn product-component []
+;  (let [product-idx (rf/subscribe [:salesroom/shelves])
+;        product (reaction (get-in @shelves [segment-idx shelf-idx product-idx]))]
+;    (fn [segment-idx shelf-idx product-idx]
+;      [ui/grid
+;       [ui/grid-row
+;        [:div (str segment-idx shelf-idx product-idx)]]])))
+
+
+
+(defn salesroom []
+  (let [height (rf/subscribe [:salesroom/height])
+        width (rf/subscribe [:salesroom/width])
+        hover? (r/atom false)]
+    (fn []
+      [ui/grid {:on-mouse-enter #(reset! hover? true)
+                :on-mouse-leave #(reset! hover? false)}
+       [ui/grid-row {:centered true}
+        [ui/icon {:name     "minus"
+                  :on-click #(rf/dispatch [:salesroom/set-height (dec @height)])
+                  :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+                             :opacity    (if @hover? 1.0 0.0)}}]]
+       [ui/grid-row {:centered true}
+        [ui/grid-column {:vertical-align :middle}
+         [ui/icon {:name     "minus"
+                   :on-click #(rf/dispatch [:salesroom/set-width (dec @width)])
+                   :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+                              :opacity    (if @hover? 1.0 0.0)}}]]
+        [ui/grid-column {:width @width}
+         [:div
+          (doall
+            (for [x (range @height)]
+              ^{:key x}
+              [:div {:style {:display :flex
+                             :flex-flow "row nowrap"
+                             :justify-content :center}}
+               (doall
+                 (for [y (range @width)]
+                   ^{:key y}
+                   [cell [x y]]))]))]]
+        [ui/grid-column {:vertical-align :middle}
+         [ui/icon {:name     "plus"
+                   :on-click #(rf/dispatch [:salesroom/set-width (inc @width)])
+                   :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+                              :opacity    (if @hover? 1.0 0.0)}}]]]
+       [ui/grid-row {:centered true}
+        [ui/icon {:name     "plus"
+                  :on-click #(rf/dispatch [:salesroom/set-height (inc @height)])
+                  :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+                             :opacity    (if @hover? 1.0 0.0)}}]]])))
 
 
 (defn component []
-  (let [height (rf/subscribe [:salesroom/height])
-        width (rf/subscribe [:salesroom/width])
-        floor (rf/subscribe [:salesroom/floor])
-        segments (rf/subscribe [:salesroom/segments])
-        hover? (r/atom false)]
+  (let []
     (fn []
+      [:div {}]
+
       [ui/grid {:style {:align-items   :flex-start
                         :align-content :flex-start}}
        [ui/grid-row {:columns :equal}
@@ -143,41 +184,9 @@
          [top-menu]]
         [ui/grid-column]]
        [ui/grid-row
-        [ui/grid-column {:width          10
-                         :stretched      true
-                         :on-mouse-enter #(reset! hover? true)
-                         :on-mouse-leave #(reset! hover? false)}
-         [ui/grid
-          [ui/grid-row {:centered true}
-           [ui/icon {:name     "minus"
-                     :on-click #(rf/dispatch [:salesroom/set-height (dec @height)])
-                     :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
-                                :opacity    (if @hover? 1.0 0.0)}}]]
-          [ui/grid-row {:centered true}
-           [ui/grid-column {:vertical-align :middle}
-            [ui/icon {:name     "minus"
-                      :on-click #(rf/dispatch [:salesroom/set-width (dec @width)])
-                      :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
-                                 :opacity    (if @hover? 1.0 0.0)}}]]
-           [ui/grid-column {:width @width}
-            [:div
-             (doall
-               (for [x (range @height)]
-                 ^{:key x}
-                 [:div.row.center-xs
-                  (doall
-                    (for [y (range @width)]
-                      ^{:key y}
-                      [cell [x y]]))]))]]
-           [ui/grid-column {:vertical-align :middle}
-            [ui/icon {:name     "plus"
-                      :on-click #(rf/dispatch [:salesroom/set-width (inc @width)])
-                      :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
-                                 :opacity    (if @hover? 1.0 0.0)}}]]]
-          [ui/grid-row {:centered true}
-           [ui/icon {:name     "plus"
-                     :on-click #(rf/dispatch [:salesroom/set-height (inc @height)])
-                     :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
-                                :opacity    (if @hover? 1.0 0.0)}}]]]]
-        [ui/grid-column {:width 6}
-         [segment]]]])))
+        [ui/grid-column {:width     10
+                         :stretched true}
+         [salesroom]]
+        [ui/grid-column {:width     6
+                         :stretched true}
+         [:div "sex"]]]])))

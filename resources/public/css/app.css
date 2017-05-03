@@ -6,9 +6,9 @@ html, body {
     height: 100%;
 }
 
-.grid {
-    height: 100%;
-}
+/*.grid {*/
+    /*height: 100%;*/
+/*}*/
 
 .grid-cell {
     box-sizing: border-box;

@@ -51,19 +51,19 @@
     (let [size (:salesroom/size db)
           segments (:salesroom/segments db)
           racks (utils/segments->racks size segments)]
-      (assoc db :salesroom/racks racks))))
+      (assoc db :salesroom/shelvings racks))))
 
 
 (rf/reg-event-db
   :salesroom/set-rack-hovered
   (fn [db [_ rack]]
-    (assoc db :salesroom/rack-hovered rack)))
+    (assoc db :salesroom/shelving-hovered rack)))
 
 
 (rf/reg-event-db
   :salesroom/set-rack-hovered
   (fn [db _]
-    (assoc db :salesroom/rack-hovered nil)))
+    (assoc db :salesroom/shelving-hovered nil)))
 
 
 (rf/reg-event-db

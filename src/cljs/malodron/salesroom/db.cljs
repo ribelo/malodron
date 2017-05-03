@@ -6,8 +6,8 @@
    :salesroom/id               0
    :salesroom/size             [10 10]
    :salesroom/floor            #{}
-   :salesroom/racks            #{}
-   :salesroom/rack-hovered     nil
+   :salesroom/shelvings        #{}
+   :salesroom/shelving-hovered nil
    :salesroom/segment-hovered  nil
    :salesroom/segments         #{}
    :salesroom/shelves          {}

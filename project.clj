@@ -2,6 +2,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.495" :scope "provided"]
                  [org.clojure/core.async "0.3.441"]
+                 [com.cognitect/transit-cljs "0.8.239"]
                  [com.stuartsierra/component "0.3.2"]
                  [com.taoensso/encore "2.90.1"]
                  [com.taoensso/timbre "4.8.0"]

@@ -48,9 +48,9 @@
 
 
 (rf/reg-sub
-  :salesroom/racks
+  :salesroom/shelvings
   (fn [db _]
-    (:salesroom/racks db)))
+    (:salesroom/shelvings db)))
 
 
 (rf/reg-sub-raw
@@ -77,12 +77,12 @@
 (rf/reg-sub-raw
   :salesroom/rack-idx
   (fn [db [_ rack]]
-    (let [racks (:salesroom/racks @db)]
+    (let [racks (:salesroom/shelvings @db)]
       (reaction (.indexOf racks rack)))))
 
 
 (defn segment-idx [cords db]
-  (let [racks (reaction (:salesroom/racks @db))]
+  (let [racks (reaction (:salesroom/shelvings @db))]
     (println @racks)
     (loop [[rack & racks] @racks rack-idx 0]
       (if rack
