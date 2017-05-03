@@ -12,3 +12,10 @@
       (if-let [storage (db/load-local-storage)]
         (merge db storage)
         db))))
+
+
+(rf/reg-event-db
+  :db/clean-db
+  (fn [_ _]
+    (merge db/default-db
+           salesroom-state)))

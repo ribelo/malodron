@@ -13,6 +13,10 @@
   (some->> (.getItem js/localStorage "malodron")
            (cljs.reader/read-string)))
 
+(.setItem js/localStorage "malodron" {:product/item :a})
+(.getItem js/localStorage "malodron")
+(load-local-storage)
+(clj->js {:product/item :a})
 
 (def default-db
   {:view/active-panel :store/salesroom})

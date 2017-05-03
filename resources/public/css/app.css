@@ -12,8 +12,8 @@ html, body {
 
 .grid-cell {
     box-sizing: border-box;
-    width: 5vh;
-    height: 5vh;
+    width: 25px;
+    height: 25px;
     text-align: center;
     border: 1px solid #EEEEEE;
     /*background-color: #332F28;*/
@@ -26,4 +26,21 @@ html, body {
 
 .shelf-cell {
     background-color: #BDBDBD;
+}
+
+.shelf-border {
+    box-sizing: border-box;
+    border: 1px solid #9E9E9E;
+    border-bottom-width: 0px;
+}
+
+.product-cell {
+    box-sizing: border-box;
+    width: 25px;
+    height: 5vh;
+    margin: 2px 1px;
+    text-align: center;
+    border: 1px solid #9E9E9E;
+    /*background-color: #332F28;*/
+    font-family: monospace;
 }

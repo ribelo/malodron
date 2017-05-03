@@ -30,42 +30,27 @@
 
 
 (rf/reg-event-fx
-  :salesroom/toggle-shelf
+  :salesroom/toggle-segment
   [->local-storage]
   (fn [{db :db} [_ cords]]
-    (let [shelves (:salesroom/shelves db)
+    (let [segments (:salesroom/segments db)
           floor (:salesroom/floor db)
           dispatch-n (if (contains? floor cords)
                        [[:salesroom/find-racks]]
                        [[:salesroom/toggle-floor cords]
                         [:salesroom/find-racks]])]
-      {:db         (if (contains? shelves cords)
-                     (update db :salesroom/shelves disj cords)
-                     (update db :salesroom/shelves conj cords))
+      {:db         (if (contains? segments cords)
+                     (update db :salesroom/segments disj cords)
+                     (update db :salesroom/segments conj cords))
        :dispatch-n dispatch-n})))
-
-
-(rf/reg-event-db
-  :salesroom/set-active-tool
-  (fn [db [_ tool]]
-    (assoc db :salesroom/active-tool tool)))
-
-
-(rf/reg-event-fx
-  :salesroom/use-tool
-  (fn [{db :db} [_ tool cords]]
-    (let [event (case tool
-                  :floor [:salesroom/toggle-floor cords]
-                  :shelf [:salesroom/toggle-shelf cords])]
-      {:dispatch event})))
 
 
 (rf/reg-event-db
   :salesroom/find-racks
   (fn [db _]
     (let [size (:salesroom/size db)
-          shelves (:salesroom/shelves db)
-          racks (utils/shelves->racks size shelves)]
+          segments (:salesroom/segments db)
+          racks (utils/segments->racks size segments)]
       (assoc db :salesroom/racks racks))))
 
 
@@ -94,13 +79,66 @@
     (assoc db :salesroom/segment-hovered nil)))
 
 
-(let [racks @(rf/subscribe [:salesroom/racks])]
-  (loop [[rack & racks] racks rack-idx 0]
-    (if rack
-      (let [segment-idx (.indexOf rack [2 3])]
-        (if-not (neg? segment-idx)
-          [rack-idx segment-idx]
-          (recur racks (inc rack-idx))))
-      nil)))
+(rf/reg-event-db
+  :salesroom/select-segment
+  (fn [db [_ cords]]
+    (assoc db :salesroom/selected-segment cords)))
 
-(.indexOf [[1 2] [3 4]] [3 4])
+
+
+(rf/reg-event-db
+  :salesroom/reset-shelves
+  (fn [db _]
+    (assoc db :salesroom/shelves {})))
+
+
+(rf/reg-event-db
+  :salesroom/add-shelf-to-segment
+  (fn [db [_ idx]]
+    (let [segment-idx (:salesroom/selected-segment db)
+          segment (get (:salesroom/shelves db) segment-idx [])]
+      (assoc-in db [:salesroom/shelves segment-idx]
+                (utils/insert-at-idx (or idx (count segment))
+                                     [(utils/product)] segment)))))
+
+
+(rf/reg-event-db
+  :salesroom/remove-shelf-from-segment
+  (fn [db [_ idx]]
+    (let [segment-idx (:salesroom/selected-segment db)
+          segment (get (:salesroom/shelves db) segment-idx [])]
+      (assoc-in db [:salesroom/shelves segment-idx]
+                (utils/remove-at-idx (or idx (dec (count segment))) segment)))))
+
+
+(rf/reg-event-db
+  :salesroom/add-product-to-shelf
+  (fn [db [_ shelf-idx product-idx]]
+    (let [segment-idx (:salesroom/selected-segment db)
+          shelf (get-in (:salesroom/shelves db) [segment-idx shelf-idx] [])]
+      (assoc-in db [:salesroom/shelves segment-idx shelf-idx]
+                (utils/insert-at-idx (or product-idx (count shelf))
+                                     (utils/product) shelf)))))
+
+
+(rf/reg-event-fx
+  :salesroom/remove-product-from-shelf
+  (fn [{db :db} [_ shelf-idx product-idx]]
+    (let [segment-idx (:salesroom/selected-segment db)
+          shelf (get-in (:salesroom/shelves db) [segment-idx shelf-idx] [])
+          new-shelf (utils/remove-at-idx (or product-idx (dec (count shelf))) shelf)]
+
+      {:db         (assoc-in db [:salesroom/shelves segment-idx shelf-idx] new-shelf)
+       :dispatch-n (if-not (seq new-shelf)
+                     [[:salesroom/remove-shelf-from-segment shelf-idx]] [])})))
+
+
+(rf/reg-event-db
+  :salesroom/update-product-in-shelf
+  (fn [db [_ shelf-idx product-idx product]]
+    (let [segment-idx (:salesroom/selected-segment db)]
+      {:db (assoc-in db [:salesroom/shelves segment-idx shelf-idx product-idx]
+                     product)})))
+
+
+;(rf/dispatch [:salesroom/reset-shelves])

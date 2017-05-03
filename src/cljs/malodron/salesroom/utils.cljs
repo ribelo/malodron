@@ -1,7 +1,7 @@
 (ns malodron.salesroom.utils)
 
 
-(defn shelves->grid [[rows cols] shelves]
+(defn segments->grid [[rows cols] shelves]
   (let [flat-grid (vec (repeat rows (vec (repeat cols 0))))]
     (reduce (fn [grid shelf]
               (assoc-in grid shelf 1))
@@ -40,8 +40,8 @@
        region))))
 
 
-(defn shelves->racks [size shelves]
-  (let [grid (shelves->grid size shelves)]
+(defn segments->racks [size shelves]
+  (let [grid (segments->grid size shelves)]
     (loop [[cord & cords] shelves racks #{}]
       (if cord
         (recur cords (conj racks (sweep-cell cord grid)))
@@ -52,9 +52,24 @@
   (.fromCharCode js/String (+ 97 num)))
 
 
+(defn insert-at-idx [idx elem coll]
+  (let [[begin end] (split-at idx coll)]
+    (vec (concat (conj (vec begin) elem) end))))
 
-(char-range \a \f)
 
-(.charCodeAt "z" 0)
+(defn remove-at-idx [idx coll]
+  (let [[begin end] (split-at idx coll)]
+    (vec (concat begin (rest end)))))
 
-(.fromCharCode js/String 97)
+
+
+(defn product
+  ([m]
+   (merge {:product/ean   nil
+           :product/plu   nil
+           :product/name  nil
+           :product/width 1
+           }
+          m))
+  ([]
+   (product {})))

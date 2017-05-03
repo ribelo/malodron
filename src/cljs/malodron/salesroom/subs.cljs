@@ -30,9 +30,21 @@
 
 
 (rf/reg-sub
+  :salesroom/segments
+  (fn [db _]
+    (:salesroom/segments db)))
+
+
+(rf/reg-sub
   :salesroom/shelves
   (fn [db _]
     (:salesroom/shelves db)))
+
+
+(rf/reg-sub
+  :salesroom/selected-segment
+  (fn [db _]
+    (:salesroom/selected-segment db)))
 
 
 (rf/reg-sub
@@ -56,16 +68,10 @@
 
 
 (rf/reg-sub-raw
-  :salesroom/is-shelf?
+  :salesroom/is-segment?
   (fn [db [_ cords]]
-    (let [shelves (:salesroom/shelves @db)]
+    (let [shelves (:salesroom/segments @db)]
       (reaction (contains? shelves cords)))))
-
-
-(rf/reg-sub
-  :salesroom/active-tool
-  (fn [db _]
-    (:salesroom/active-tool db)))
 
 
 (rf/reg-sub-raw
@@ -86,6 +92,10 @@
             (recur racks (inc rack-idx))))
         nil))))
 
+(defn segment->place [idx]
+  (str (str/upper (utils/int->char (first @idx))) (str/pad (str (second @idx)) {:length 2 :padding "0"})))
+
+
 (rf/reg-sub-raw
   :salesroom/segment-idx
   (fn [db [_ cords]]
@@ -95,10 +105,28 @@
 (rf/reg-sub-raw
   :salesroom/segment-place
   (fn [db [_ cords]]
-    (println :salesroom/segment-place cords)
     (let [idx (reaction (segment-idx cords db))]
-      (reaction (str (str/upper (utils/int->char (first @idx))) (str/pad (str (second @idx)) {:length 2 :padding "0"}))))))
+      (reaction (segment->place idx)))))
 
-(rf/clear-subscription-cache!)
-@(rf/subscribe [:salesroom/racks])
-@(rf/subscribe [:salesroom/segment-idx [6 9]])
+
+(rf/reg-sub-raw
+  :salesroom/selected-segment-place
+  (fn [db _]
+    (let [cords (reaction (:salesroom/selected-segment @db))
+          idx (reaction (segment-idx @cords db))]
+      (reaction (segment->place idx)))))
+
+
+(rf/reg-sub-raw
+  :salesroom/selected-segment-shelves
+  (fn [db _]
+    (let [shelves (reaction (:salesroom/shelves @db))
+          selected-segment (reaction (:salesroom/selected-segment @db))]
+      (reaction (get @shelves @selected-segment [])))))
+
+
+;(rf/reg-sub-raw
+;  :salesroom/product-place
+;  (fn [db [_ cords]]
+;    (let [idx (reaction (segment-idx cords db))]
+;      (reaction (segment->place idx)))))
