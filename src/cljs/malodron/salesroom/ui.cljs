@@ -183,7 +183,6 @@
   (let []
     (fn []
       [:div {}]
-
       [ui/grid {:style {:align-items   :flex-start
                         :align-content :flex-start}}
        [ui/grid-row {:columns :equal}
