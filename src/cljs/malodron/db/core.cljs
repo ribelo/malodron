@@ -17,5 +17,9 @@
              (t/read r))))
 
 
+(defn clear-local-storage []
+  (.setItem js/localStorage "malodron" {}))
+
+
 (def default-db
   {:view/active-panel :store/salesroom})

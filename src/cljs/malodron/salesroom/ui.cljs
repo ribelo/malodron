@@ -7,42 +7,41 @@
 
 
 (defn top-menu []
-  [ui/menu {:inverted true}
-   [ui/menu-item {:content "podłoga"}]
-   [ui/menu-item {:content "półka"}]])
+  (let [active-tool (rf/subscribe [:salesroom/active-tool])]
+    (fn []
+      [ui/menu {:inverted true}
+       [ui/menu-item {:content  "podłoga"
+                      :active   (= @active-tool :floor)
+                      :on-click #(rf/dispatch [:salesroom/set-active-tool :floor])}]
+       [ui/menu-item {:content  "segment"
+                      :active   (= @active-tool :segment)
+                      :on-click #(rf/dispatch [:salesroom/set-active-tool :segment])}]])))
 
 
 (defn grid-cell [cords]
-  [:div.grid-cell {:on-mouse-down (fn [e]
-                                    (case (.-button e)
-                                      0 nil
-                                      1 (rf/dispatch [:salesroom/toggle-segment cords])
-                                      2 (rf/dispatch [:salesroom/toggle-floor cords])))}])
+  (let [active-tool (rf/subscribe [:salesroom/active-tool])]
+    (fn [cords]
+      [:div.grid-cell {:on-click (fn [_]
+                                   (when @active-tool
+                                     (rf/dispatch [:salesroom/use-active-tool cords])))}])))
 
 
 (defn floor-cell [cords]
-  [:div.grid-cell.floor-cell {:on-mouse-down (fn [e]
-                                               (case (.-button e)
-                                                 0 nil
-                                                 1 (rf/dispatch [:salesroom/toggle-segment cords])
-                                                 2 (rf/dispatch [:salesroom/toggle-floor cords])))}])
+  (let [active-tool (rf/subscribe [:salesroom/active-tool])]
+    (fn [cords]
+      [:div.grid-cell.floor-cell {:on-click (fn [_]
+                                              (when @active-tool
+                                                (rf/dispatch [:salesroom/use-active-tool cords])))}])))
 
 
 (defn segment-cell [cords]
   (let [place (rf/subscribe [:salesroom/segment-place cords])]
     (fn [cords]
-      [ui/popup {:trigger  (r/as-element [:div.grid-cell.shelf-cell {:on-mouse-down  (fn [e]
-                                                                                       (case (.-button e)
-                                                                                         0 (rf/dispatch [:salesroom/select-segment cords])
-                                                                                         1 (rf/dispatch [:salesroom/toggle-segment cords])
-                                                                                         2 (rf/dispatch [:salesroom/toggle-floor cords])))
+      [ui/popup {:trigger  (r/as-element [:div.grid-cell.shelf-cell {:on-click       #(rf/dispatch [:salesroom/use-active-tool cords])
                                                                      :on-mouse-enter #(rf/dispatch [:salesroom/set-segment-hovered cords])
                                                                      :on-mouse-leave #(rf/dispatch [:salesroom/reset-segment-hovered])}])
                  :inverted true
                  :content  @place}])))
-
-(defn product-cell []
-  )
 
 
 (defn cell [cords]
@@ -58,6 +57,10 @@
         [grid-cell cords]))))
 
 
+(defn product []
+  (let []))
+
+
 (defn segment []
   (let [shelves (rf/subscribe [:salesroom/selected-segment-shelves])
         selected-segment (rf/subscribe [:salesroom/selected-segment])
@@ -65,6 +68,7 @@
         hover? (r/atom false)
         shelf-hover? (r/atom {})]
     (fn []
+
       [ui/grid {:on-mouse-enter #(reset! hover? true)
                 :on-mouse-leave #(reset! hover? false)}
        [ui/grid-row {:centered true}
@@ -79,6 +83,7 @@
                   :padded   true}
          (doall
            (for [[shelf-idx shelf] (map vector (range) @shelves)]
+             ^{:key shelf-idx}
              [ui/grid-row {:centered       true
                            :vertical-align :middle
                            :on-mouse-enter #(reset-in! shelf-hover? [shelf-idx] true)
@@ -94,20 +99,23 @@
               [:div {:style {:display   :flex
                              :flex-flow "row nowrap"
                              :flex      "1 0 0"}}
-               (doall (for [[product-idx {:keys [product/width]
-                                          :or   {width 1}
-                                          :as   product}] (map vector (range) shelf)]
-                        [:div.product-cell {:on-click #(println :bla @selected-segment shelf-idx product-idx)
-                                            :style    {:display     :flex
-                                                       :flex-flow   "row nowrap"
-                                                       :flex-grow   1
-                                                       :flex-shrink 0
-                                                       :flex-basis  0}}
-                         (doall
-                           (for [_ (range width)]
-                             [ui/image {:src      "img/products/8006040710512.jpg"
-                                        :height   "25px"
-                                        :centered true}]))]))]
+               (doall
+                 (for [[product-idx {:keys [product/width]
+                                     :or   {width 1}
+                                     :as   product}] (map vector (range) shelf)]
+                   ^{:key product-idx}
+                   [:div.product-cell {:on-click #(rf/dispatch [:salesroom/select-product])
+                                       :style    {:display     :flex
+                                                  :flex-flow   "row nowrap"
+                                                  :flex-grow   1
+                                                  :flex-shrink 0
+                                                  :flex-basis  0}}
+                    (doall
+                      (for [_ (range width)]
+                        ^{:key product-idx}
+                        [ui/image {:src      "img/products/8006040710512.jpg"
+                                   :height   "25px"
+                                   :centered true}]))]))]
               [ui/icon {:name     "plus"
                         :on-click #(rf/dispatch [:salesroom/add-product-to-shelf shelf-idx])
                         :style    {:transition "all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
@@ -152,8 +160,8 @@
           (doall
             (for [x (range @height)]
               ^{:key x}
-              [:div {:style {:display :flex
-                             :flex-flow "row nowrap"
+              [:div {:style {:display         :flex
+                             :flex-flow       "row nowrap"
                              :justify-content :center}}
                (doall
                  (for [y (range @width)]
@@ -189,4 +197,4 @@
          [salesroom]]
         [ui/grid-column {:width     6
                          :stretched true}
-         [:div "sex"]]]])))
+         [segment]]]])))

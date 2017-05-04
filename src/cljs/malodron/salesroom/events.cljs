@@ -20,10 +20,10 @@
 
 (rf/reg-event-db
   :salesroom/toggle-floor
-  [->local-storage]
+  ;[->local-storage]
   (fn [db [_ cords]]
-    (println :salesroom/toggle-floor cords)
     (let [floor (:salesroom/floor db)]
+      (println :salesroom/toggle-floor cords floor)
       (if (contains? floor cords)
         (update db :salesroom/floor disj cords)
         (update db :salesroom/floor conj cords)))))
@@ -31,7 +31,7 @@
 
 (rf/reg-event-fx
   :salesroom/toggle-segment
-  [->local-storage]
+  ;[->local-storage]
   (fn [{db :db} [_ cords]]
     (let [segments (:salesroom/segments db)
           floor (:salesroom/floor db)
@@ -139,6 +139,30 @@
     (let [segment-idx (:salesroom/selected-segment db)]
       {:db (assoc-in db [:salesroom/shelves segment-idx shelf-idx product-idx]
                      product)})))
+
+
+(rf/reg-event-db
+  :salesroom/set-active-tool
+  (fn [db [_ tool]]
+    (let [active-tool (:salesroom/active-tool db)]
+      (assoc db :salesroom/active-tool (if-not (= active-tool tool) tool nil)))))
+
+
+(rf/reg-event-fx
+  :salesroom/use-active-tool
+  (fn [{db :db} [_ cords]]
+    (let [active-tool (:salesroom/active-tool db)]
+      (println :salesroom/use-active-tool cords active-tool)
+      {:dispatch (case active-tool
+                   :floor [:salesroom/toggle-floor cords]
+                   :segment [:salesroom/toggle-segment cords]
+                   [:salesroom/select-segment cords])})))
+
+
+(rf/reg-event-db
+  :salesroom/select-product
+  (fn [db [_ path]]
+    (assoc db :salesroom/product-path path)))
 
 
 ;(rf/dispatch [:salesroom/reset-shelves])

@@ -125,6 +125,19 @@
       (reaction (get @shelves @selected-segment [])))))
 
 
+(rf/reg-sub
+  :salesroom/active-tool
+  (fn [db _]
+    (:salesroom/active-tool db)))
+
+
+(rf/reg-sub
+  :salesroom/selected-product
+  (fn [db _]
+    (let [path (:salesroom/product-path db)]
+      (get-in db [:salesroom/shelves path]))))
+
+
 ;(rf/reg-sub-raw
 ;  :salesroom/product-place
 ;  (fn [db [_ cords]]

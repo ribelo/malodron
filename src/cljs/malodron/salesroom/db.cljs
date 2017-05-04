@@ -13,6 +13,6 @@
    :salesroom/shelves          {}
    :salesroom/active-tool      :floor
    :salesroom/selected-segment nil
-   :salesroom/selected-product nil
+   :salesroom/product-path     nil
    :product/selected           nil
    :product/selected-path      nil})
